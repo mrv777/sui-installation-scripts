@@ -158,10 +158,11 @@ echo -e '[INFO] Check Sui status' && sleep 1
 if [[ $(service sui-node status | grep active) =~ "running" ]]; then
   echo -e "Your Sui Node \e[32minstalled and works\e[39m!"
   echo -e "You can check node status by the command \e[7mservice sui-node status\e[0m"
-  echo -e "You can check node logs by the command \e[7msudo journalctl -u sui-node -f -o cat\e[0m"
+  echo -e "You can check node logs with the command \e[7msudo journalctl -u sui-node -f -o cat\e[0m"
   echo -e "You can also check the node status online at \e[7mhttps://node.sui.zvalid.com/\e[0m"
 else
-  echo -e "Your Sui Node \e[31mwas not installed correctly\e[39m, please reinstall."
+  echo -e "Your Sui Node \e[31mwas not installed correctly\e[39m"
+  echo -e "You can check the logs with the command \e[7msudo journalctl -u sui-node -f -o cat\e[0m"
 fi
 
 [ "${SETUP_FIREWALL:-}" ] || read -r -p "It is recommended that you setup and enable ufw, would you like to do that now? (Default yes): " SETUP_FIREWALL
