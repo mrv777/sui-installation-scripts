@@ -46,7 +46,7 @@ After=network.target
 RestartSec=2s
 Type=simple
 WorkingDirectory=${HOME_DIR}/${SUI_NODE_FOLDER}/target/release/
-ExecStart=/bin/bash ${HOME_DIR}/${SUI_NODE_FOLDER}/target/release/sui-node --config-path ${HOME_DIR}/${SUI_NODE_FOLDER}/fullnode.yaml
+ExecStart=${HOME_DIR}/${SUI_NODE_FOLDER}/target/release/sui-node --config-path ${HOME_DIR}/${SUI_NODE_FOLDER}/fullnode.yaml
 Restart=always
 LimitNOFILE=65535
 
