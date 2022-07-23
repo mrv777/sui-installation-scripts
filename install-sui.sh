@@ -131,7 +131,7 @@ cp crates/sui-config/data/fullnode-template.yaml fullnode.yaml
 # Download the latest genesis state
 curl -fLJO https://github.com/MystenLabs/sui-genesis/raw/main/devnet/genesis.blob
 
-sudo sed -i.bak "s/genesis-file-location:.*/genesis-file-location: \"\/${HOME_DIR}\/${SUI_NODE_FOLDER}\/genesis.blob\"/" /${HOME_DIR}/${SUI_NODE_FOLDER}/fullnode.yaml
+sudo sed -i.bak "s|genesis-file-location:.*|genesis-file-location: \"${HOME_DIR}\/${SUI_NODE_FOLDER}\/genesis.blob\"|" /${HOME_DIR}/${SUI_NODE_FOLDER}/fullnode.yaml
 # sudo wget -O /var/sui/genesis.blob https://github.com/MystenLabs/sui-genesis/raw/main/devnet/genesis.blob
 
 # sudo sed -i.bak "s/db-path:.*/db-path: \"\/var\/sui\/db\"/ ; s/genesis-file-location:.*/genesis-file-location: \"\/var\/sui\/genesis.blob\"/" /var/sui/fullnode.yaml
