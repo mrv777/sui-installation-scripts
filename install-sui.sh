@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# This script installs an sui node on an ubuntu/debian server.
+# This script installs a sui node on an ubuntu/debian server.
 # It is based on the official installation guide
 # (https://docs.sui.io/build/fullnode)
 #
@@ -23,8 +23,8 @@ REBOOT=true
 ###################################################################################################
 
 SUI_NODE_FOLDER="sui"
-
 SUI_NODE_SERVICE="sui-node"
+SUI_NODE_NETWORK="devnet"
 
 LOCAL_USER=$(whoami)
 HOME_DIR="${HOME}"
@@ -106,7 +106,7 @@ if [ -f "$bash_profile" ]; then
   . $HOME/.bash_profile
 fi
 
-echo -e '[INFO] Install software' && sleep 1
+echo -e '[INFO] Install dependencies' && sleep 1
 sudo apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC sudo apt-get install -y --no-install-recommends tzdata git ca-certificates curl build-essential libssl-dev pkg-config libclang-dev cmake jq
 echo -e '[INFO] Install Rust' && sleep 1
 sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -125,12 +125,12 @@ git remote add upstream https://github.com/MystenLabs/sui
 # Sync your fork
 git fetch upstream
 # Check out the devnet branch
-git checkout --track upstream/devnet
+git checkout --track upstream/${SUI_NODE_NETWORK}
 # Make a copy of the fullnode configuration template:
 cp crates/sui-config/data/fullnode-template.yaml fullnode.yaml
 # Download the latest genesis state
-curl -fLJO https://github.com/MystenLabs/sui-genesis/raw/main/devnet/genesis.blob
-
+curl -fLJO https://github.com/MystenLabs/sui-genesis/raw/main/${SUI_NODE_NETWORK}/genesis.blob
+# Set path of genesis file in config file
 sudo sed -i.bak "s|genesis-file-location:.*|genesis-file-location: \"${HOME_DIR}\/${SUI_NODE_FOLDER}\/genesis.blob\"|" /${HOME_DIR}/${SUI_NODE_FOLDER}/fullnode.yaml
 # sudo wget -O /var/sui/genesis.blob https://github.com/MystenLabs/sui-genesis/raw/main/devnet/genesis.blob
 
@@ -182,4 +182,15 @@ if [ "$SETUP_FIREWALL" == "yes" ]; then
 
   echo -e '[INFO] Check ufw status' && sleep 1
   sudo ufw status
+fi
+
+[ "${SETUP_UPDATE:-}" ] || read -r -p "Would you like to add a script to update SUI? (Default yes): " SETUP_UPDATE
+SETUP_UPDATE=${SETUP_UPDATE:-yes}
+if [ "$SETUP_UPDATE" == "yes" ]; then
+
+  echo "" && echo "[INFO] Working in the directory: $DEFAULT_INSTALL_LOCATION"
+  ChangeDirectory
+  echo -e '[INFO] Downloading script' && sleep 1
+  curl -fLJO https://raw.githubusercontent.com/mrv777/sui-installation-scripts/main/update-sui.sh
+  echo -e "You can update your node with the command \e[7mbash ./update-sui.sh\e[0m"
 fi
