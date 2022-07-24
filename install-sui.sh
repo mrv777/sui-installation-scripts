@@ -82,13 +82,19 @@ echo ""
 date +"%Y-%m-%d %H:%M:%S || [INFO] Sui install script started"
 # Verification Checks
 if [ $UID -eq 0 ]; then
+  echo ""
   echo "[ERROR] $0 should not be run as root."
-  echo "You can run 'bash ./create-sudo-user.sh' to create a new user"
+  echo -e "You can get the new user script with \e[7mwget https://raw.githubusercontent.com/mrv777/sui-installation-scripts/master/create-sudo-user.sh\e[0m"
+  echo -e "Then you can run \e[7mbash ./create-sudo-user.sh\e[0m to create a new user"
   echo "Exiting..."
+  echo ""
   exit 1
 fi
 if [ -z "$(grep -Ei 'debian|ubuntu|mint' /etc/*release)" ]; then
+  echo ""
   echo "Error: only debian based OS is supported."
+  echo "Exiting..."
+  echo ""
   exit 2
 fi
 
@@ -106,9 +112,9 @@ if [ -f "$bash_profile" ]; then
   . $HOME/.bash_profile
 fi
 
-echo -e '[INFO] Install dependencies' && sleep 1
+echo "" && echo '[INFO] Install dependencies' && sleep 1
 sudo apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC sudo apt-get install -y --no-install-recommends tzdata git ca-certificates curl build-essential libssl-dev pkg-config libclang-dev cmake jq
-echo -e '[INFO] Install Rust' && sleep 1
+echo "" && echo '[INFO] Install Rust' && sleep 1
 sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
 source $HOME/.cargo/env
 
@@ -116,7 +122,7 @@ source $HOME/.cargo/env
 # sudo mkdir -p /var/sui/db
 # cd $HOME
 
-echo -e '[INFO] Check out GIT repo' && sleep 1
+echo "" && echo '[INFO] Check out GIT repo' && sleep 1
 # Set up your fork of the Sui repository
 git clone https://github.com/MystenLabs/sui.git
 cd sui
@@ -136,7 +142,7 @@ sudo sed -i.bak "s|genesis-file-location:.*|genesis-file-location: \"${HOME_DIR}
 
 # sudo sed -i.bak "s/db-path:.*/db-path: \"\/var\/sui\/db\"/ ; s/genesis-file-location:.*/genesis-file-location: \"\/var\/sui\/genesis.blob\"/" /var/sui/fullnode.yaml
 
-echo -e '[INFO] Build sui node' && sleep 1
+echo "" && echo '[INFO] Build sui node' && sleep 1
 cargo build --release -p sui-node
 sudo sed -i.bak 's/127.0.0.1/0.0.0.0/' fullnode.yaml
 
@@ -153,8 +159,9 @@ echo "" && echo "[INFO] enabling sui node service ..."
 sudo systemctl enable ${SUI_NODE_SERVICE}.service
 sudo systemctl restart sui-node
 
+echo ""
 echo "==================================================="
-echo -e '[INFO] Check Sui status' && sleep 1
+echo '[INFO] Check Sui status' && sleep 1
 if [[ $(service sui-node status | grep active) =~ "running" ]]; then
   echo -e "Your Sui Node \e[32minstalled and works\e[39m!"
   echo -e "You can check node status by the command \e[7mservice sui-node status\e[0m"
@@ -168,19 +175,19 @@ fi
 [ "${SETUP_FIREWALL:-}" ] || read -r -p "It is recommended that you setup and enable ufw, would you like to do that now? (Default yes): " SETUP_FIREWALL
 SETUP_FIREWALL=${SETUP_FIREWALL:-yes}
 if [ "$SETUP_FIREWALL" == "yes" ]; then
-  echo -e '[INFO] Install ufw' && sleep 1
+  echo "" && echo '[INFO] Install ufw' && sleep 1
   sudo apt-get install ufw
 
-  echo -e '[INFO] Allow default ports for ufw' && sleep 1
+  echo "" && echo '[INFO] Allow default ports for ufw' && sleep 1
   sudo ufw allow 9184
   sudo ufw allow 9000
   sudo ufw allow 8080
   sudo ufw allow 22
 
-  echo -e '[INFO] Enable ufw' && sleep 1
+  echo "" && echo '[INFO] Enable ufw' && sleep 1
   sudo ufw enable
 
-  echo -e '[INFO] Check ufw status' && sleep 1
+  echo "" && echo '[INFO] Check ufw status' && sleep 1
   sudo ufw status
 fi
 
@@ -190,7 +197,7 @@ if [ "$SETUP_UPDATE" == "yes" ]; then
 
   echo "" && echo "[INFO] Working in the directory: $DEFAULT_INSTALL_LOCATION"
   ChangeDirectory
-  echo -e '[INFO] Downloading script' && sleep 1
+  echo '[INFO] Downloading script' && sleep 1
   curl -fLJO https://raw.githubusercontent.com/mrv777/sui-installation-scripts/main/update-sui.sh
   echo -e "You can update your node with the command \e[7mbash ./update-sui.sh\e[0m"
 fi

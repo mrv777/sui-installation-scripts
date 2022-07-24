@@ -17,14 +17,14 @@ HOME_DIR="${HOME}"
 # MAIN
 ###################################################################################################
 
-echo -e '[INFO] Stopping service' && sleep 1
+echo "" && echo '[INFO] Stopping service' && sleep 1
 sudo systemctl stop ${SUI_NODE_SERVICE}.service
 
-echo -e '[INFO] Removing old files' && sleep 1
+echo "" && echo '[INFO] Removing old files' && sleep 1
 rm -rf /var/sui/db/* /var/sui/genesis.blob $HOME/sui
 source $HOME/.cargo/env
 
-echo -e '[INFO] Check out GIT repo' && sleep 1
+echo "" && echo '[INFO] Check out GIT repo' && sleep 1
 # Set up your fork of the Sui repository
 git clone https://github.com/MystenLabs/sui.git
 cd sui
@@ -41,15 +41,16 @@ curl -fLJO https://github.com/MystenLabs/sui-genesis/raw/main/${SUI_NODE_NETWORK
 # Set path of genesis file in config file
 sudo sed -i.bak "s|genesis-file-location:.*|genesis-file-location: \"${HOME_DIR}\/${SUI_NODE_FOLDER}\/genesis.blob\"|" /${HOME_DIR}/${SUI_NODE_FOLDER}/fullnode.yaml
 
-echo -e '[INFO] Build sui node' && sleep 1
+echo "" && echo '[INFO] Build sui node' && sleep 1
 cargo build --release -p sui-node
 sudo sed -i.bak 's/127.0.0.1/0.0.0.0/' fullnode.yaml
 
-echo -e '[INFO] Restarting service' && sleep 1
+echo "" && echo '[INFO] Restarting service' && sleep 1
 sudo systemctl restart ${SUI_NODE_SERVICE}.service
 
+echo ""
 echo "==================================================="
-echo -e '[INFO] Check Sui status' && sleep 1
+echo "" && echo '[INFO] Check Sui status' && sleep 1
 if [[ $(service sui-node status | grep active) =~ "running" ]]; then
   echo -e "Your Sui Node \e[32mis updated\e[39m!"
   echo -e "You can check node status by the command \e[7mservice sui-node status\e[0m"
