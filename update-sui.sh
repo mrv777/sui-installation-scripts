@@ -17,6 +17,18 @@ HOME_DIR="${HOME}"
 # MAIN
 ###################################################################################################
 
+echo "" && echo '[INFO] Checking script version'
+read -r current_version <VERSION
+remote_version=$(wget -qO- https://raw.githubusercontent.com/mrv777/sui-installation-scripts/main/VERSION)
+echo "[INFO] Current version: $current_version"
+echo "[INFO] Remote version: $remote_version" && echo
+if [ $remote_version -gt $current_version ]; then
+  echo "" && echo "[ERROR] There is a new version of the script available. Please update."
+  echo "Exiting..." && ""
+  exit 1
+fi
+echo "" && echo '[INFO] No script updates. Continuing...'
+
 echo "" && echo '[INFO] Stopping service' && sleep 1
 sudo systemctl stop ${SUI_NODE_SERVICE}.service
 
