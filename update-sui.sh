@@ -21,13 +21,25 @@ echo "" && echo '[INFO] Checking script version'
 read -r current_version <VERSION
 remote_version=$(wget -qO- https://raw.githubusercontent.com/mrv777/sui-installation-scripts/main/VERSION)
 echo "[INFO] Current version: $current_version"
-echo "[INFO] Remote version: $remote_version" && echo
+echo "[INFO] Remote version: $remote_version"
 if [ $remote_version -gt $current_version ]; then
   echo "" && echo "[ERROR] There is a new version of the script available. Please update."
-  echo "Exiting..." && ""
+  echo "Exiting..." && echo ""
   exit 1
 fi
 echo "" && echo '[INFO] No script updates. Continuing...'
+
+echo "" && echo '[INFO] Checking node version'
+node_version=$(curl -sL https://api.github.com/repos/MystenLabs/sui/tags | jq -r ".[1].name" | cut -d "-" -f2)
+remote_node_version=$(grep 'version =' /${HOME_DIR}/${SUI_NODE_FOLDER}/crates/sui/Cargo.toml -m 1 | cut -d'"' -f 2)
+echo "[INFO] Current node version: $node_version"
+echo "[INFO] Remote node version: $remote_node_version"
+if [ $node_version == $remote_node_version ]; then
+  echo "" && echo "[ERROR] There is no new version of the node software available."
+  echo "Exiting..." && echo ""
+  exit 2
+fi
+exit 0
 
 echo "" && echo '[INFO] Stopping service' && sleep 1
 sudo systemctl stop ${SUI_NODE_SERVICE}.service
