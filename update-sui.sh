@@ -93,8 +93,8 @@ curl -fLJO https://github.com/MystenLabs/sui-genesis/raw/main/${SUI_NODE_NETWORK
 sudo sed -i.bak "s|genesis-file-location:.*|genesis-file-location: \"${HOME_DIR}\/${SUI_NODE_FOLDER}\/genesis.blob\"|" /${HOME_DIR}/${SUI_NODE_FOLDER}/fullnode.yaml
 sleep 1
 
-echo "" && echo '[INFO] Build sui node'
-cargo build --release -p sui-node
+echo "" && echo '[INFO] Building sui node (this will take awhile)'
+cargo build --release -p sui-node &>sui_update_cargo_build_log.txt
 sudo sed -i.bak 's/127.0.0.1/0.0.0.0/' fullnode.yaml
 sleep 1
 

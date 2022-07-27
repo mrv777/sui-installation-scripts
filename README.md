@@ -22,7 +22,7 @@ Logout and log back in as new user.
 Now that we have a regular user we can do the 2 commands to get and set everything up:
 
 - `wget https://raw.githubusercontent.com/mrv777/sui-installation-scripts/master/install-sui.sh`
-- `bash ./install-sui.sh`
+- `screen -S sui -m bash ./install-sui.sh`
 
 ## Files
 

@@ -122,7 +122,7 @@ source $HOME/.cargo/env
 # sudo mkdir -p /var/sui/db
 # cd $HOME
 
-echo "" && echo '[INFO] Check out GIT repo' && sleep 1
+echo "" && echo '[INFO] Check out GIT repo'
 # Set up your fork of the Sui repository
 git clone https://github.com/MystenLabs/sui.git
 cd sui
@@ -139,12 +139,13 @@ curl -fLJO https://github.com/MystenLabs/sui-genesis/raw/main/${SUI_NODE_NETWORK
 # Set path of genesis file in config file
 sudo sed -i.bak "s|genesis-file-location:.*|genesis-file-location: \"${HOME_DIR}\/${SUI_NODE_FOLDER}\/genesis.blob\"|" /${HOME_DIR}/${SUI_NODE_FOLDER}/fullnode.yaml
 # sudo wget -O /var/sui/genesis.blob https://github.com/MystenLabs/sui-genesis/raw/main/devnet/genesis.blob
-
+sleep 1
 # sudo sed -i.bak "s/db-path:.*/db-path: \"\/var\/sui\/db\"/ ; s/genesis-file-location:.*/genesis-file-location: \"\/var\/sui\/genesis.blob\"/" /var/sui/fullnode.yaml
 
-echo "" && echo '[INFO] Build sui node' && sleep 1
-cargo build --release -p sui-node
+echo "" && echo '[INFO] Building sui node (this will take awhile)'
+cargo build --release -p sui-node &>sui_cargo_build_log.txt
 sudo sed -i.bak 's/127.0.0.1/0.0.0.0/' fullnode.yaml
+sleep 1
 
 echo "" && echo "[INFO] creating sui node service and logs ..."
 sudo mkdir -p /etc/systemd/system
@@ -154,10 +155,12 @@ Storage=persistent
 EOF
 sudo systemctl restart systemd-journald
 sudo systemctl daemon-reload
+sleep 1
 
 echo "" && echo "[INFO] enabling sui node service ..."
 sudo systemctl enable ${SUI_NODE_SERVICE}.service
 sudo systemctl restart sui-node
+sleep 1
 
 echo ""
 echo "==================================================="
@@ -178,11 +181,14 @@ if [ "$SETUP_FIREWALL" == "yes" ]; then
   echo "" && echo '[INFO] Install ufw' && sleep 1
   sudo apt-get install ufw
 
+  [ "${SSH_PORT:-}" ] || read -r -p "What port should be left open for SSH? (Default 22): " SSH_PORT
+  SSH_PORT=${SSH_PORT:-22}
+
   echo "" && echo '[INFO] Allow default ports for ufw' && sleep 1
   sudo ufw allow 9184
   sudo ufw allow 9000
   sudo ufw allow 8080
-  sudo ufw allow 22
+  sudo ufw allow $SSH_PORT
 
   echo "" && echo '[INFO] Enable ufw' && sleep 1
   sudo ufw enable
@@ -198,6 +204,7 @@ if [ "$SETUP_UPDATE" == "yes" ]; then
   echo "" && echo "[INFO] Working in the directory: $DEFAULT_INSTALL_LOCATION"
   ChangeDirectory
   echo '[INFO] Downloading script' && sleep 1
+  curl -fLJO https://raw.githubusercontent.com/mrv777/sui-installation-scripts/main/VERSION
   curl -fLJO https://raw.githubusercontent.com/mrv777/sui-installation-scripts/main/update-sui.sh
   echo -e "You can update your node with the command \e[7mbash ./update-sui.sh\e[0m"
 fi
