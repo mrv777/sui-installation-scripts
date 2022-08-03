@@ -101,6 +101,25 @@ fi
 echo "" && echo "[INFO] Working in the directory: $DEFAULT_INSTALL_LOCATION"
 ChangeDirectory
 
+echo "" && echo "[INFO] Swap file Check"
+grep -q "swapfile" /etc/fstab
+if [[ ! $? -ne 0 ]]; then
+  echo "" && echo "[INFO] Swap file exists"
+else
+  [ "${CREATE_SWAP:-}" ] || read -r -p "How many GB of a swap file would you like to create (Enter 0 for no swap)(Default 8): " CREATE_SWAP
+  CREATE_SWAP=${CREATE_SWAP:-8}
+  if [ "$CREATE_SWAP" != "0" ]; then
+    echo "" && echo "[INFO] Creating swap file, this will take a moment..."
+    sudo fallocate -l "$CREATE_SWAP"G $HOME/swapfile
+    sudo dd if=/dev/zero of=swapfile bs=1K count=8M
+    sudo chmod 600 $HOME/swapfile
+    sudo mkswap $HOME/swapfile
+    sudo swapon $HOME/swapfile
+    sudo swapon --show
+    echo $HOME'/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+    echo "" && echo "[INFO] Swap file created"
+  fi
+fi
 # Check if curl exists
 if exists curl; then
   echo ''
@@ -129,7 +148,7 @@ cd sui
 # Set up the Sui repository as a git remote
 git remote add upstream https://github.com/MystenLabs/sui
 # Sync your fork
-git fetch upstream
+git fetch upstream >"/dev/null" 2>&1
 # Check out the devnet branch
 git checkout --track upstream/${SUI_NODE_NETWORK}
 # Make a copy of the fullnode configuration template:
@@ -159,20 +178,20 @@ sleep 1
 
 echo "" && echo "[INFO] enabling sui node service ..."
 sudo systemctl enable ${SUI_NODE_SERVICE}.service
-sudo systemctl restart sui-node
+sudo systemctl restart ${SUI_NODE_SERVICE}
 sleep 1
 
 echo ""
 echo "==================================================="
 echo '[INFO] Check Sui status' && sleep 1
-if [[ $(service sui-node status | grep active) =~ "running" ]]; then
+if [[ $(service ${SUI_NODE_SERVICE} status | grep active) =~ "running" ]]; then
   echo -e "Your Sui Node \e[32minstalled and works\e[39m!"
-  echo -e "You can check node status by the command \e[7mservice sui-node status\e[0m"
-  echo -e "You can check node logs with the command \e[7msudo journalctl -u sui-node -f -o cat\e[0m"
+  echo -e "You can check node status by the command \e[7mservice ${SUI_NODE_SERVICE} status\e[0m"
+  echo -e "You can check node logs with the command \e[7msudo journalctl -u ${SUI_NODE_SERVICE} -f -o cat\e[0m"
   echo -e "You can also check the node status online at \e[7mhttps://node.sui.zvalid.com/\e[0m"
 else
   echo -e "Your Sui Node \e[31mwas not installed correctly\e[39m"
-  echo -e "You can check the logs with the command \e[7msudo journalctl -u sui-node -f -o cat\e[0m"
+  echo -e "You can check the logs with the command \e[7msudo journalctl -u ${SUI_NODE_SERVICE} -f -o cat\e[0m"
 fi
 
 [ "${SETUP_FIREWALL:-}" ] || read -r -p "It is recommended that you setup and enable ufw, would you like to do that now? (Default yes): " SETUP_FIREWALL

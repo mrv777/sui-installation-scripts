@@ -105,12 +105,12 @@ sleep 1
 echo ""
 echo "==================================================="
 echo "" && echo '[INFO] Check Sui status'
-if [[ $(service sui-node status | grep active) =~ "running" ]]; then
+if [[ $(service ${SUI_NODE_SERVICE} status | grep active) =~ "running" ]]; then
   echo -e "Your Sui Node \e[32mis updated\e[39m!"
-  echo -e "You can check node status by the command \e[7mservice sui-node status\e[0m"
-  echo -e "You can check node logs with the command \e[7msudo journalctl -u sui-node -f -o cat\e[0m"
+  echo -e "You can check node status by the command \e[7mservice ${SUI_NODE_SERVICE} status\e[0m"
+  echo -e "You can check node logs with the command \e[7msudo journalctl -u ${SUI_NODE_SERVICE} -f -o cat\e[0m"
   echo -e "You can also check the node status online at \e[7mhttps://node.sui.zvalid.com/\e[0m"
 else
   echo -e "Your Sui Node \e[31mwas not updated correctly\e[39m"
-  echo -e "You can check the logs with the command \e[7msudo journalctl -u sui-node -f -o cat\e[0m"
+  echo -e "You can check the logs with the command \e[7msudo journalctl -u ${SUI_NODE_SERVICE} -f -o cat\e[0m"
 fi
