@@ -28,6 +28,17 @@ function exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
+function update() {
+  printf "[INFO] Updating script..."
+
+  curl -fLJO https://raw.githubusercontent.com/mrv777/sui-installation-scripts/main/update-sui.sh
+  curl -fLJO https://raw.githubusercontent.com/mrv777/sui-installation-scripts/main/VERSION
+
+  chmod +x update-sui.sh
+  exec ./update-sui.sh
+
+}
+
 ###################################################################################################
 # MAIN
 ###################################################################################################
@@ -38,11 +49,16 @@ remote_version=$(wget -qO- https://raw.githubusercontent.com/mrv777/sui-installa
 echo "[INFO] Local version: $current_version"
 echo "[INFO] Remote version: $remote_version"
 if [ $remote_version -gt $current_version ]; then
-  echo "" && echo "[ERROR] There is a new version of the script available. Please update."
-  echo "Exiting..." && echo ""
-  exit 1
+  echo "" && echo "[WARN] There is a new version of the script available. Please update."
+  [ "${UPDATE_SCRIPT:-}" ] || read -r -p "Script update available, would you like to update this script? (Default yes): " UPDATE_SCRIPT
+  UPDATE_SCRIPT=${UPDATE_SCRIPT:-yes}
+  if [ "$UPDATE_SCRIPT" == "yes" ]; then
+    update
+    exit 3
+  fi
+else
+  echo "" && echo '[INFO] No script updates. Continuing...'
 fi
-echo "" && echo '[INFO] No script updates. Continuing...'
 
 echo "" && echo '[INFO] Checking node version'
 remote_node_version=$(curl -sL https://api.github.com/repos/MystenLabs/sui/tags | jq -r ".[1].name" | cut -d "-" -f2)
