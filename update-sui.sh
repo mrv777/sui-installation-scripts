@@ -98,7 +98,7 @@ cd sui
 # Set up the Sui repository as a git remote
 git remote add upstream https://github.com/MystenLabs/sui
 # Sync your fork
-git fetch upstream
+git fetch upstream >"/dev/null" 2>&1
 # Check out the devnet branch
 git checkout --track upstream/${SUI_NODE_NETWORK}
 # Make a copy of the fullnode configuration template:
